@@ -281,14 +281,23 @@
               <h2>דשבורד ביצועים</h2>
               <div id="stats" class="stats"></div>
             </div>
-            <div class="panel"><h2>עקומת הון</h2><canvas id="equityChart" width="1200" height="280"></canvas></div>
-            <div class="split-grid">
-              <div class="panel"><h2>ביצועים חודשיים</h2><canvas id="monthlyChart" width="560" height="260"></canvas></div>
-              <div class="panel"><h2>ביצועים לפי נכס</h2><canvas id="assetChart" width="560" height="260"></canvas></div>
+            <div id="dashboardEmpty" class="panel hidden">
+              <h2>עדיין אין נתונים להצגה</h2>
+              <p class="status">הוסף עסקה ראשונה כדי לראות גרפים וסטטיסטיקות אמיתיות.</p>
+              <div class="actions">
+                <button type="button" data-home-nav="journal">לעסקה חדשה</button>
+              </div>
             </div>
-            <div class="split-grid">
-              <div class="panel"><h2>ביצועים לפי אסטרטגיה</h2><canvas id="strategyChart" width="560" height="260"></canvas></div>
-              <div class="panel"><h2>רגש מול ביצועים</h2><canvas id="emotionChart" width="560" height="260"></canvas></div>
+            <div id="dashboardDetails">
+              <div class="panel"><h2>עקומת הון</h2><canvas id="equityChart" width="1200" height="210"></canvas></div>
+              <div class="split-grid">
+                <div class="panel"><h2>ביצועים חודשיים</h2><canvas id="monthlyChart" width="560" height="180"></canvas></div>
+                <div class="panel"><h2>ביצועים לפי נכס</h2><canvas id="assetChart" width="560" height="180"></canvas></div>
+              </div>
+              <div class="split-grid">
+                <div class="panel"><h2>ביצועים לפי אסטרטגיה</h2><canvas id="strategyChart" width="560" height="180"></canvas></div>
+                <div class="panel"><h2>רגש מול ביצועים</h2><canvas id="emotionChart" width="560" height="180"></canvas></div>
+              </div>
             </div>
           </section>
 

@@ -81,6 +81,21 @@ function createId(){return `${Date.now()}-${Math.random().toString(36).slice(2,8
 function stamp(){return new Date().toISOString().slice(0,10)}
 function escapeHtml(v){return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
 
+// Override: compact dashboard behavior with real empty-state handling.
+function renderDashboard(list){
+  const empty=document.getElementById("dashboardEmpty");
+  const details=document.getElementById("dashboardDetails");
+  const hasData=Array.isArray(list)&&list.length>0;
+  if(empty) empty.classList.toggle("hidden",hasData);
+  if(details) details.classList.toggle("hidden",!hasData);
+  if(!hasData) return;
+  drawEquity(list);
+  drawMonthly(list);
+  drawByKey(list,"asset",els.assetChart);
+  drawByKey(list,"strategy",els.strategyChart,"ללא");
+  drawEmotion(list);
+}
+
 // Interface productivity layer
 (() => {
   const DRAFT_KEY = "fxJournalDraftV1";
