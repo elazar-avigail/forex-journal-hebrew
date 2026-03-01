@@ -1,4 +1,4 @@
-﻿const CACHE = "fx-journal-v14";
+﻿const CACHE = "fx-journal-v15";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,9 +29,16 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   const req = event.request;
+  const url = new URL(req.url);
   const isHtml = req.mode === "navigate" || req.headers.get("accept")?.includes("text/html");
+  const isAppAsset =
+    url.origin === self.location.origin &&
+    (url.pathname.endsWith("/app.js") ||
+      url.pathname.endsWith("/styles.css") ||
+      url.pathname.endsWith("/index.html"));
 
-  if (isHtml) {
+  // Always prefer network for core app shell files so new deployments appear immediately.
+  if (isHtml || isAppAsset) {
     event.respondWith(
       fetch(req)
         .then((res) => {
@@ -56,6 +63,7 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
 
 
 
