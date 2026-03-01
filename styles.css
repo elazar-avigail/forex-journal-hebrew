@@ -85,24 +85,25 @@ body {
 
 .workspace {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 1fr;
   min-height: 70vh;
 }
 
 .side-nav {
-  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   background: var(--bg-soft);
-  padding: 0.8rem;
-  display: grid;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  align-content: start;
+  align-items: center;
 }
 
 .tab {
   border: 1px solid transparent;
   border-radius: 11px;
-  padding: 0.65rem;
-  text-align: right;
+  padding: 0.52rem 0.78rem;
+  text-align: center;
   color: var(--muted);
   background: transparent;
   font-weight: 600;
@@ -145,8 +146,8 @@ h2 { margin: 0 0 0.7rem; font-size: 1rem; }
 .home-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .split-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .stats { grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); }
-.cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cols-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .home-card,
@@ -259,7 +260,7 @@ button.danger { background: var(--bad); }
 
 .metrics-strip {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   margin-top: 0.55rem;
 }
@@ -298,7 +299,7 @@ button.danger { background: var(--bad); }
 .filters {
   display: grid;
   gap: 0.5rem;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .cards { display: none; gap: 0.5rem; margin-top: 0.6rem; }
@@ -371,13 +372,6 @@ canvas {
 .toast.show { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 1180px) {
-  .workspace { grid-template-columns: 1fr; }
-  .side-nav {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    border-left: 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .tab { text-align: center; }
   .cols-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -395,20 +389,10 @@ canvas {
 
   .topbar { flex-direction: column; align-items: flex-start; }
 
-  .side-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 75;
-    background: var(--panel);
-    padding: 0.45rem;
-  }
-
-  body { padding-bottom: 84px; }
+  body { padding-bottom: 18px; }
   .cols-5, .cols-4, .cols-2, .filters, .metrics-strip { grid-template-columns: 1fr; }
   .cards { display: grid; }
   .table-wrap { display: none; }
-  .fab { bottom: 94px; }
-  .toast { bottom: 94px; left: 12px; right: 12px; }
+  .fab { bottom: 18px; }
+  .toast { bottom: 18px; left: 12px; right: 12px; }
 }
