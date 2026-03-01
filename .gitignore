@@ -1,0 +1,4 @@
+﻿# local runtime caches
+*.log
+.DS_Store
+Thumbs.db

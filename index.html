@@ -1,0 +1,347 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>יומן מסחר פורקס</title>
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="יומן מסחר" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-bg"></div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>יומן מסחר פורקס</h1>
+          <p>אפליקציה מקצועית לניהול, ניתוח ושיפור ביצועי מסחר.</p>
+        </div>
+        <div class="top-actions">
+          <button id="installBtn" class="ghost hidden" type="button">התקנת אפליקציה</button>
+          <div class="badge" id="todayBadge">היום: --</div>
+          <div class="badge" id="tradesCountBadge">0 עסקאות</div>
+          <div class="badge" id="netBadge">נטו: $0.00</div>
+        </div>
+      </header>
+
+      <nav class="tabbar" aria-label="ניווט ראשי">
+        <button class="tab active" data-nav="home" type="button">בית</button>
+        <button class="tab" data-nav="journal" type="button">יומן</button>
+        <button class="tab" data-nav="dashboard" type="button">ביצועים</button>
+        <button class="tab" data-nav="analytics" type="button">ניתוחים</button>
+        <button class="tab" data-nav="settings" type="button">הגדרות</button>
+      </nav>
+
+      <main>
+        <section class="view active" data-view="home">
+          <div class="panel home-hero">
+            <h2>מרכז בקרה</h2>
+            <p>מכאן מתחילים: בחר יעד ועבור ישירות למסך הרלוונטי.</p>
+            <div class="home-grid">
+              <button type="button" class="home-card" data-home-nav="journal">
+                <strong>עסקה חדשה</strong>
+                <span>תיעוד מהיר עם צ'קליסט ושגיאות</span>
+              </button>
+              <button type="button" class="home-card" data-home-nav="dashboard">
+                <strong>דשבורד ביצועים</strong>
+                <span>רווח נקי, עקומת הון, ימים חזקים וחלשים</span>
+              </button>
+              <button type="button" class="home-card" data-home-nav="analytics">
+                <strong>ניתוח עומק</strong>
+                <span>פילוח לפי צמד, סשן ויום בשבוע</span>
+              </button>
+              <button type="button" class="home-card" data-home-nav="settings">
+                <strong>ניהול נתונים</strong>
+                <span>ייצוא, ייבוא וגיבוי היומן</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>תמונת מצב מהירה</h2>
+            <div class="home-kpis">
+              <article class="mini-kpi">
+                <h3>עסקאות</h3>
+                <p id="homeTradesCount">0</p>
+              </article>
+              <article class="mini-kpi">
+                <h3>אחוז הצלחה</h3>
+                <p id="homeWinRate">0%</p>
+              </article>
+              <article class="mini-kpi">
+                <h3>רווח נקי</h3>
+                <p id="homeNetPnl">$0.00</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" data-view="dashboard">
+          <div class="panel">
+            <h2>מדדים מרכזיים</h2>
+            <div id="stats" class="stats"></div>
+          </div>
+
+          <div class="panel">
+            <h2>עקומת הון</h2>
+            <canvas id="equityChart" width="1200" height="280"></canvas>
+          </div>
+
+          <div class="split-grid">
+            <div class="panel">
+              <h2>ביצועים לפי יום</h2>
+              <canvas id="weekdayChart" width="560" height="240"></canvas>
+            </div>
+            <div class="panel">
+              <h2>לוח רווח/הפסד חודשי</h2>
+              <div id="calendarGrid" class="calendar-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" data-view="journal">
+          <div class="panel panel-primary" id="formSection">
+            <div class="head-row">
+              <h2 id="formTitle">עסקה חדשה</h2>
+              <div class="inline-block">
+                <label for="startingBalance">הון התחלתי ($)</label>
+                <div class="inline-input">
+                  <input id="startingBalance" type="number" step="0.01" min="0" />
+                  <button id="saveBalanceBtn" type="button">שמירה</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-row">
+              <span>צמדים מהירים:</span>
+              <button type="button" class="chip" data-pair="EUR/USD">EUR/USD</button>
+              <button type="button" class="chip" data-pair="GBP/USD">GBP/USD</button>
+              <button type="button" class="chip" data-pair="USD/JPY">USD/JPY</button>
+              <button type="button" class="chip" data-pair="XAU/USD">XAU/USD</button>
+              <button type="button" class="chip" data-pair="BTC/USD">BTC/USD</button>
+            </div>
+
+            <form id="tradeForm">
+              <input id="tradeId" type="hidden" />
+              <div class="grid cols-5">
+                <label>תאריך ושעה
+                  <input id="entryDate" type="datetime-local" required />
+                </label>
+                <label>צמד
+                  <input id="pair" type="text" placeholder="EUR/USD" required />
+                </label>
+                <label>כיוון
+                  <div class="segmented">
+                    <button class="seg active" type="button" data-direction="Long">לונג</button>
+                    <button class="seg" type="button" data-direction="Short">שורט</button>
+                  </div>
+                  <select id="direction" class="sr-only">
+                    <option value="Long">לונג</option>
+                    <option value="Short">שורט</option>
+                  </select>
+                </label>
+                <label>סיכון $ (R)
+                  <input id="riskAmount" type="number" step="0.01" min="0" value="0" required />
+                </label>
+                <label>רווח/הפסד $ (PnL)
+                  <input id="pnl" type="number" step="0.01" required />
+                </label>
+              </div>
+
+              <div class="quick-row">
+                <span>קיצור PnL:</span>
+                <button type="button" class="chip" data-pnl="50">+50</button>
+                <button type="button" class="chip" data-pnl="100">+100</button>
+                <button type="button" class="chip" data-pnl="-50">-50</button>
+                <button type="button" class="chip" data-pnl="-100">-100</button>
+              </div>
+
+              <details id="advancedFields" class="advanced" open>
+                <summary>שדות מתקדמים</summary>
+                <div class="grid cols-4">
+                  <label>אסטרטגיה
+                    <input id="strategy" type="text" placeholder="Breakout" />
+                  </label>
+                  <label>סשן
+                    <select id="session">
+                      <option value="">ללא</option>
+                      <option value="אסיה">אסיה</option>
+                      <option value="לונדון">לונדון</option>
+                      <option value="ניו יורק">ניו יורק</option>
+                    </select>
+                  </label>
+                  <label>רגש
+                    <select id="emotion">
+                      <option value="ניטרלי">ניטרלי</option>
+                      <option value="רגוע">רגוע</option>
+                      <option value="לחוץ">לחוץ</option>
+                      <option value="אגרסיבי">אגרסיבי</option>
+                      <option value="פוחד">פוחד</option>
+                    </select>
+                  </label>
+                  <label>משך עסקה (דקות)
+                    <input id="durationMin" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>ציון Setup (1-5)
+                    <input id="setupScore" type="number" min="1" max="5" step="1" value="3" />
+                  </label>
+                  <label>ציון משמעת (1-5)
+                    <input id="discipline" type="number" min="1" max="5" step="1" value="3" />
+                  </label>
+                  <label>עמלות ($)
+                    <input id="commission" type="number" step="0.01" value="0" />
+                  </label>
+                  <label>תגיות (מופרדות בפסיק)
+                    <input id="tags" type="text" placeholder="news, breakout" />
+                  </label>
+                </div>
+
+                <div class="grid cols-2">
+                  <fieldset class="checkset">
+                    <legend>צ'קליסט לפני כניסה</legend>
+                    <label><input id="chkPlan" type="checkbox" /> יש תכנית ברורה</label>
+                    <label><input id="chkTrend" type="checkbox" /> בכיוון הטרנד</label>
+                    <label><input id="chkRisk" type="checkbox" /> סיכון תקין</label>
+                    <label><input id="chkNews" type="checkbox" /> נבדקו חדשות</label>
+                    <label><input id="chkExecution" type="checkbox" /> ביצוע מדויק</label>
+                  </fieldset>
+
+                  <fieldset class="checkset">
+                    <legend>טעויות שהתבצעו</legend>
+                    <label><input class="mistake" type="checkbox" value="כניסה מוקדמת" /> כניסה מוקדמת</label>
+                    <label><input class="mistake" type="checkbox" value="הזזת סטופ" /> הזזת סטופ</label>
+                    <label><input class="mistake" type="checkbox" value="נקמה בשוק" /> נקמה בשוק</label>
+                    <label><input class="mistake" type="checkbox" value="אובר-טרייד" /> אובר-טרייד</label>
+                    <label><input class="mistake" type="checkbox" value="יציאה מוקדמת" /> יציאה מוקדמת</label>
+                  </fieldset>
+                </div>
+
+                <div class="grid cols-2">
+                  <label>הערות
+                    <textarea id="notes" rows="3" placeholder="מה עבד? מה לשפר?"></textarea>
+                  </label>
+                  <label>צילום מסך עסקה
+                    <input id="screenshot" type="file" accept="image/*" />
+                    <img id="screenshotPreview" class="screenshot-preview hidden" alt="תצוגת צילום" />
+                  </label>
+                </div>
+              </details>
+
+              <div class="actions">
+                <button id="submitBtn" type="submit">שמירת עסקה</button>
+                <button id="resetBtn" class="secondary" type="button">ניקוי</button>
+              </div>
+            </form>
+            <p id="statusBar" class="status"></p>
+          </div>
+
+          <div class="panel">
+            <h2>רשימת עסקאות</h2>
+            <div class="filters">
+              <label>חיפוש
+                <input id="searchText" type="text" placeholder="צמד/אסטרטגיה/הערות/תגיות" />
+              </label>
+              <label>מתאריך
+                <input id="fromDate" type="date" />
+              </label>
+              <label>עד תאריך
+                <input id="toDate" type="date" />
+              </label>
+              <label>כיוון
+                <select id="filterDirection">
+                  <option value="">הכל</option>
+                  <option value="Long">לונג</option>
+                  <option value="Short">שורט</option>
+                </select>
+              </label>
+              <label>סשן
+                <select id="filterSession">
+                  <option value="">הכל</option>
+                  <option value="אסיה">אסיה</option>
+                  <option value="לונדון">לונדון</option>
+                  <option value="ניו יורק">ניו יורק</option>
+                </select>
+              </label>
+              <label>מיון
+                <select id="sortBy">
+                  <option value="entryDateDesc">חדש לישן</option>
+                  <option value="entryDateAsc">ישן לחדש</option>
+                  <option value="pnlDesc">רווח גבוה</option>
+                  <option value="pnlAsc">הפסד גבוה</option>
+                  <option value="rDesc">R גבוה</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="tradesCards" class="cards"></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>תאריך</th>
+                    <th>צמד</th>
+                    <th>כיוון</th>
+                    <th>אסטרטגיה</th>
+                    <th>PnL</th>
+                    <th>R</th>
+                    <th>טעויות</th>
+                    <th>פעולות</th>
+                  </tr>
+                </thead>
+                <tbody id="tradesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" data-view="analytics">
+          <div class="split-grid">
+            <div class="panel">
+              <h2>ביצועים לפי צמד</h2>
+              <div id="pairStats"></div>
+            </div>
+            <div class="panel">
+              <h2>ביצועים לפי סשן</h2>
+              <div id="sessionStats"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>ביצועים לפי יום בשבוע</h2>
+            <div id="weekdayStats"></div>
+          </div>
+        </section>
+
+        <section class="view" data-view="settings">
+          <div class="panel">
+            <h2>ניהול נתונים</h2>
+            <div class="actions">
+              <button id="exportJsonBtn" type="button">ייצוא JSON</button>
+              <button id="exportCsvBtn" type="button">ייצוא CSV</button>
+              <button id="importBtn" class="secondary" type="button">ייבוא</button>
+              <input id="importInput" type="file" accept=".json,.csv" hidden />
+              <button id="clearAllBtn" class="danger" type="button">מחיקת כל הנתונים</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <button id="quickAddBtn" class="fab" type="button" aria-label="הוספה מהירה">+</button>
+    <div id="toast" class="toast"></div>
+
+    <template id="statCardTpl">
+      <article class="stat-card">
+        <h3></h3>
+        <p></p>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
