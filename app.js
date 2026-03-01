@@ -276,3 +276,106 @@ function escapeHtml(v){return String(v).replaceAll("&","&amp;").replaceAll("<","
   bindDraftAutosave();
   restoreDraft();
 })();
+
+// Interface upgrade: quick/full modes, recent assets, step navigation, one-click filter reset
+(() => {
+  const UI_MODE_KEY = "fxJournalUiModeV1";
+  const quickBtn = document.getElementById("quickTradeModeBtn");
+  const fullBtn = document.getElementById("fullTradeModeBtn");
+  const nextStepBtn = document.getElementById("nextStepBtn");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const recentAssetsEl = document.getElementById("recentAssets");
+
+  const basicsStep = document.querySelector('[data-step="basics"]');
+  const pricingStep = document.querySelector('[data-step="pricing"]');
+  const disciplineStep = document.querySelector('[data-step="discipline"]');
+  const stepOrder = [basicsStep, pricingStep, disciplineStep].filter(Boolean);
+
+  function setUiMode(mode) {
+    const isQuick = mode === "quick";
+    document.body.classList.toggle("ui-quick", isQuick);
+    if (quickBtn) quickBtn.classList.toggle("is-active", isQuick);
+    if (fullBtn) fullBtn.classList.toggle("is-active", !isQuick);
+
+    if (isQuick) {
+      basicsStep && (basicsStep.open = true);
+      pricingStep && (pricingStep.open = true);
+      disciplineStep && (disciplineStep.open = false);
+    }
+
+    localStorage.setItem(UI_MODE_KEY, mode);
+  }
+
+  function getUiMode() {
+    const mode = localStorage.getItem(UI_MODE_KEY);
+    return mode === "quick" ? "quick" : "full";
+  }
+
+  function goToNextStep() {
+    const currentIndex = stepOrder.findIndex((step) => step?.open);
+    const index = currentIndex === -1 ? 0 : Math.min(currentIndex + 1, stepOrder.length - 1);
+    stepOrder.forEach((step, i) => { if (step) step.open = i === index; });
+
+    const focusMap = ["entryDate", "entryPrice", "marketCondition"];
+    document.getElementById(focusMap[index])?.focus();
+  }
+
+  function clearFilters() {
+    const ids = [
+      "searchText", "fromDate", "toDate", "filterAsset", "filterDirection",
+      "filterStrategy", "filterMarket", "filterWeekday", "filterHour", "sortBy"
+    ];
+
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (id === "sortBy") el.value = "entryDateDesc";
+      else el.value = "";
+    });
+
+    refreshUI();
+    flash("הפילטרים נוקו");
+  }
+
+  function renderRecentAssets() {
+    if (!recentAssetsEl) return;
+    const unique = [...new Set((trades || []).map((t) => String(t.asset || "").trim()).filter(Boolean))].slice(-6).reverse();
+
+    recentAssetsEl.innerHTML = "";
+    if (!unique.length) return;
+
+    const label = document.createElement("span");
+    label.className = "chip-btn";
+    label.textContent = "נכסים אחרונים:";
+    label.style.cursor = "default";
+    recentAssetsEl.appendChild(label);
+
+    unique.forEach((asset) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip-btn";
+      btn.textContent = asset;
+      btn.addEventListener("click", () => {
+        const input = document.getElementById("asset");
+        if (input) {
+          input.value = asset;
+          input.focus();
+          refreshCalculationPreview();
+        }
+      });
+      recentAssetsEl.appendChild(btn);
+    });
+  }
+
+  quickBtn?.addEventListener("click", () => setUiMode("quick"));
+  fullBtn?.addEventListener("click", () => setUiMode("full"));
+  nextStepBtn?.addEventListener("click", goToNextStep);
+  clearFiltersBtn?.addEventListener("click", clearFilters);
+
+  document.getElementById("tradeForm")?.addEventListener("submit", () => {
+    setTimeout(renderRecentAssets, 0);
+  });
+
+  setUiMode(getUiMode());
+  renderRecentAssets();
+})();

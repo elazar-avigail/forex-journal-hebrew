@@ -90,6 +90,12 @@
 
               <form id="tradeForm">
                 <input id="tradeId" type="hidden" />
+                <div class="form-toolbar">
+                  <button id="quickTradeModeBtn" class="secondary" type="button">טרייד מהיר</button>
+                  <button id="fullTradeModeBtn" class="secondary" type="button">טרייד מלא</button>
+                  <button id="nextStepBtn" class="secondary" type="button">לשלב הבא</button>
+                  <div id="recentAssets" class="recent-assets" aria-live="polite"></div>
+                </div>
 
                 <details class="advanced" data-step="basics" open>
                   <summary>שלב 1: נתוני עסקה בסיסיים</summary>
@@ -136,7 +142,7 @@
                   </div>
                 </details>
 
-                <details class="advanced" data-step="discipline">
+                <details class="advanced quick-hide" data-step="discipline">
                   <summary>שלב 3: ניתוח רגשי ומשמעת</summary>
                   <div class="grid cols-4">
                     <label>מצב שוק
@@ -214,6 +220,9 @@
 
             <div class="panel">
               <h2>רשימת עסקאות</h2>
+              <div class="actions">
+                <button id="clearFiltersBtn" class="secondary" type="button">ניקוי כל הפילטרים</button>
+              </div>
               <details class="advanced" open>
                 <summary>פילטרים חכמים</summary>
                 <div class="filters">

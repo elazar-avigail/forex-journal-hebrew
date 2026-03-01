@@ -265,6 +265,35 @@ button.danger { background: var(--bad); }
   margin-top: 0.55rem;
 }
 
+.form-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.55rem;
+}
+
+.form-toolbar .is-active {
+  background: linear-gradient(140deg, var(--accent), var(--accent-2));
+  color: #fff;
+}
+
+.recent-assets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.recent-assets .chip-btn {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.25rem 0.62rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
 .metric-chip {
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -284,6 +313,10 @@ button.danger { background: var(--bad); }
   bottom: 0;
   background: linear-gradient(180deg, transparent, var(--panel) 45%);
   padding-top: 0.45rem;
+}
+
+body.ui-quick .quick-hide {
+  display: none !important;
 }
 
 .status { color: var(--muted); min-height: 1.1rem; font-size: 0.84rem; margin: 0.2rem 0; }
@@ -391,6 +424,8 @@ canvas {
 
   body { padding-bottom: 18px; }
   .cols-5, .cols-4, .cols-2, .filters, .metrics-strip { grid-template-columns: 1fr; }
+  .form-toolbar { align-items: stretch; }
+  .recent-assets { width: 100%; }
   .cards { display: grid; }
   .table-wrap { display: none; }
   .fab { bottom: 18px; }
