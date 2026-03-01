@@ -394,3 +394,52 @@ function renderDashboard(list){
   setUiMode(getUiMode());
   renderRecentAssets();
 })();
+
+// Glass shatter click effect on every button
+(() => {
+  const SHARDS = 12;
+
+  function spawnShatter(button, clientX, clientY) {
+    const rect = button.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const burst = document.createElement("span");
+    burst.className = "glass-shatter-burst";
+
+    for (let i = 0; i < SHARDS; i += 1) {
+      const shard = document.createElement("span");
+      shard.className = "glass-shard";
+      shard.style.left = `${x}px`;
+      shard.style.top = `${y}px`;
+
+      const angle = (Math.PI * 2 * i) / SHARDS + (Math.random() * 0.35 - 0.175);
+      const distance = 10 + Math.random() * 24;
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+      const rot = -160 + Math.random() * 320;
+      const size = 5 + Math.random() * 7;
+
+      shard.style.setProperty("--dx", `${dx.toFixed(2)}px`);
+      shard.style.setProperty("--dy", `${dy.toFixed(2)}px`);
+      shard.style.setProperty("--rot", `${rot.toFixed(1)}deg`);
+      shard.style.width = `${size.toFixed(1)}px`;
+      shard.style.height = `${size.toFixed(1)}px`;
+
+      burst.appendChild(shard);
+    }
+
+    button.appendChild(burst);
+    setTimeout(() => burst.remove(), 520);
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("button") : null;
+    if (!button) return;
+
+    const x = typeof event.clientX === "number" ? event.clientX : button.getBoundingClientRect().left + button.offsetWidth / 2;
+    const y = typeof event.clientY === "number" ? event.clientY : button.getBoundingClientRect().top + button.offsetHeight / 2;
+
+    spawnShatter(button, x, y);
+  });
+})();
