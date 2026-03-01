@@ -395,9 +395,9 @@ function renderDashboard(list){
   renderRecentAssets();
 })();
 
-// Glass shatter click effect on every button
+// Cinematic glass click effect on every button
 (() => {
-  const SHARDS = 12;
+  const SHARDS = 14;
 
   function spawnShatter(button, clientX, clientY) {
     const rect = button.getBoundingClientRect();
@@ -406,6 +406,12 @@ function renderDashboard(list){
 
     const burst = document.createElement("span");
     burst.className = "glass-shatter-burst";
+
+    const ring = document.createElement("span");
+    ring.className = "glass-ring";
+    ring.style.left = `${x}px`;
+    ring.style.top = `${y}px`;
+    burst.appendChild(ring);
 
     for (let i = 0; i < SHARDS; i += 1) {
       const shard = document.createElement("span");
@@ -430,7 +436,24 @@ function renderDashboard(list){
     }
 
     button.appendChild(burst);
-    setTimeout(() => burst.remove(), 520);
+    setTimeout(() => burst.remove(), 560);
+  }
+
+  function spawnScreenWave(clientX, clientY) {
+    const wave = document.createElement("span");
+    wave.className = "screen-wave";
+    wave.style.left = `${clientX}px`;
+    wave.style.top = `${clientY}px`;
+    document.body.appendChild(wave);
+    setTimeout(() => wave.remove(), 540);
+  }
+
+  function popButton(button) {
+    button.classList.remove("btn-press-pop");
+    // force reflow to restart animation
+    void button.offsetWidth;
+    button.classList.add("btn-press-pop");
+    setTimeout(() => button.classList.remove("btn-press-pop"), 380);
   }
 
   document.addEventListener("click", (event) => {
@@ -440,6 +463,8 @@ function renderDashboard(list){
     const x = typeof event.clientX === "number" ? event.clientX : button.getBoundingClientRect().left + button.offsetWidth / 2;
     const y = typeof event.clientY === "number" ? event.clientY : button.getBoundingClientRect().top + button.offsetHeight / 2;
 
+    popButton(button);
     spawnShatter(button, x, y);
+    spawnScreenWave(x, y);
   });
 })();

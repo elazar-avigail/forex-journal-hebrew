@@ -1,4 +1,4 @@
-﻿const CACHE = "fx-journal-v15";
+﻿const CACHE = "fx-journal-v16";
 const ASSETS = [
   "./",
   "./index.html",
@@ -63,6 +63,7 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
 
 
 
