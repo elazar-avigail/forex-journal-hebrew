@@ -80,3 +80,199 @@ function clamp(v,min,max){return Number.isNaN(v)?min:Math.max(min,Math.min(max,v
 function createId(){return `${Date.now()}-${Math.random().toString(36).slice(2,8)}`}
 function stamp(){return new Date().toISOString().slice(0,10)}
 function escapeHtml(v){return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+
+// Interface productivity layer
+(() => {
+  const DRAFT_KEY = "fxJournalDraftV1";
+  const QUICK_KEY = "fxJournalQuickModeV1";
+  const draftHint = document.getElementById("draftHint");
+  const quickMode = document.getElementById("quickMode");
+  const duplicateLastBtn = document.getElementById("duplicateLastBtn");
+  const form = document.getElementById("tradeForm");
+  const basicsStep = document.querySelector('[data-step="basics"]');
+  const pricingStep = document.querySelector('[data-step="pricing"]');
+  const disciplineStep = document.querySelector('[data-step="discipline"]');
+
+  let lastSnapshotBeforeSubmit = null;
+
+  function setDraftHint(text) {
+    if (draftHint) draftHint.textContent = `טיוטה: ${text}`;
+  }
+
+  function requiredFilled(ids) {
+    return ids.every((id) => String(document.getElementById(id)?.value || "").trim() !== "");
+  }
+
+  function saveDraft() {
+    if (!form) return;
+    const payload = {
+      data: readForm(),
+      quick: !!quickMode?.checked,
+      at: new Date().toISOString(),
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+    setDraftHint(`נשמרה ${fmtDate(payload.at)}`);
+  }
+
+  function clearDraft() {
+    localStorage.removeItem(DRAFT_KEY);
+    setDraftHint("אין טיוטה");
+  }
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return setDraftHint("אין טיוטה");
+      const parsed = JSON.parse(raw);
+      const data = parsed?.data || {};
+
+      Object.keys(data).forEach((key) => {
+        const el = document.getElementById(key);
+        if (!el) return;
+        if (el.type === "checkbox") el.checked = !!data[key];
+        else el.value = data[key] ?? "";
+      });
+
+      setDirection(data.direction || "Long");
+      document.getElementById("followedPlan").checked = !!data.followedPlan;
+      document.querySelectorAll(".mistake").forEach((box) => {
+        box.checked = (data.mistakes || []).includes(box.value);
+      });
+
+      if (quickMode && typeof parsed.quick === "boolean") quickMode.checked = parsed.quick;
+      setDraftHint(`שוחזרה ${fmtDate(parsed.at || new Date().toISOString())}`);
+      refreshCalculationPreview();
+    } catch {
+      setDraftHint("שגיאת טיוטה");
+    }
+  }
+
+  function applyQuickModeDefaults(snapshot) {
+    if (!quickMode?.checked || !snapshot) return;
+    const carry = ["asset", "assetType", "direction", "strategy", "riskPercent", "marketCondition", "positionSize"];
+    carry.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = snapshot[id] ?? "";
+    });
+    setDirection(snapshot.direction || "Long");
+    document.getElementById("entryDate").value = toLocalDateTime(new Date());
+    refreshCalculationPreview();
+  }
+
+  function openStep(stepEl, focusId) {
+    if (!stepEl) return;
+    stepEl.open = true;
+    if (focusId) document.getElementById(focusId)?.focus();
+  }
+
+  function stepAutoAdvance() {
+    if (requiredFilled(["entryDate", "asset", "assetType", "direction", "strategy"])) {
+      if (basicsStep) basicsStep.open = false;
+      openStep(pricingStep, "entryPrice");
+    }
+    if (requiredFilled(["entryPrice", "stopLoss", "takeProfit", "exitPrice", "positionSize"])) {
+      if (pricingStep) pricingStep.open = false;
+      openStep(disciplineStep, "marketCondition");
+    }
+  }
+
+  function bindShortcuts() {
+    document.addEventListener("keydown", (e) => {
+      if (e.altKey && ["1", "2", "3", "4", "5"].includes(e.key)) {
+        e.preventDefault();
+        const map = { "1": "home", "2": "journal", "3": "dashboard", "4": "analytics", "5": "settings" };
+        activateView(map[e.key]);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        activateView("journal");
+        document.getElementById("asset")?.focus();
+      }
+      if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName || "")) {
+        e.preventDefault();
+        activateView("journal");
+        document.getElementById("searchText")?.focus();
+      }
+    });
+  }
+
+  function bindContinuousMode() {
+    if (quickMode) {
+      quickMode.checked = localStorage.getItem(QUICK_KEY) === "1";
+      quickMode.addEventListener("change", () => {
+        localStorage.setItem(QUICK_KEY, quickMode.checked ? "1" : "0");
+      });
+    }
+
+    form?.addEventListener("submit", () => {
+      lastSnapshotBeforeSubmit = readForm();
+    });
+
+    form?.addEventListener("submit", () => {
+      const before = trades.length;
+      setTimeout(() => {
+        const after = trades.length;
+        if (after !== before || !document.getElementById("tradeId")?.value) {
+          applyQuickModeDefaults(lastSnapshotBeforeSubmit);
+          clearDraft();
+        }
+      }, 0);
+    });
+  }
+
+  function bindDuplicateLast() {
+    duplicateLastBtn?.addEventListener("click", () => {
+      if (!Array.isArray(trades) || !trades.length) return flash("אין עסקה לשכפול");
+      const last = [...trades].sort((a, b) => new Date(b.entryDate) - new Date(a.entryDate))[0];
+      const fieldMap = {
+        asset: last.asset,
+        assetType: last.assetType,
+        strategy: last.strategy,
+        entryPrice: last.entryPrice,
+        stopLoss: last.stopLoss,
+        takeProfit: last.takeProfit,
+        exitPrice: last.exitPrice,
+        positionSize: last.positionSize,
+        riskPercent: last.riskPercentPlan,
+        marketCondition: last.marketCondition,
+        emotionBefore: last.emotionBefore,
+        emotionAfter: last.emotionAfter,
+        discipline: last.discipline,
+        notes: last.notes,
+      };
+      Object.entries(fieldMap).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value ?? "";
+      });
+      setDirection(last.direction || "Long");
+      document.getElementById("entryDate").value = toLocalDateTime(new Date());
+      document.getElementById("followedPlan").checked = !!last.followedPlan;
+      document.querySelectorAll(".mistake").forEach((box) => { box.checked = (last.mistakes || []).includes(box.value); });
+      refreshCalculationPreview();
+      flash("עסקה אחרונה שוכפלה");
+    });
+  }
+
+  function bindDraftAutosave() {
+    if (!form) return;
+    let timer = null;
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(saveDraft, 250);
+    };
+
+    form.addEventListener("input", schedule);
+    form.addEventListener("change", schedule);
+  }
+
+  ["entryDate", "asset", "strategy", "entryPrice", "stopLoss", "takeProfit", "exitPrice", "positionSize"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("blur", stepAutoAdvance);
+  });
+
+  bindShortcuts();
+  bindContinuousMode();
+  bindDuplicateLast();
+  bindDraftAutosave();
+  restoreDraft();
+})();

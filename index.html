@@ -91,7 +91,7 @@
               <form id="tradeForm">
                 <input id="tradeId" type="hidden" />
 
-                <details class="advanced" open>
+                <details class="advanced" data-step="basics" open>
                   <summary>שלב 1: נתוני עסקה בסיסיים</summary>
                   <div class="grid cols-5">
                     <label>תאריך ושעה<input id="entryDate" type="datetime-local" required /></label>
@@ -117,7 +117,7 @@
                   </div>
                 </details>
 
-                <details class="advanced" open>
+                <details class="advanced" data-step="pricing" open>
                   <summary>שלב 2: מחירים, סיכון ותוצאה</summary>
                   <div class="grid cols-5">
                     <label>מחיר כניסה<input id="entryPrice" type="number" step="0.00001" required /></label>
@@ -136,7 +136,7 @@
                   </div>
                 </details>
 
-                <details class="advanced" open>
+                <details class="advanced" data-step="discipline" open>
                   <summary>שלב 3: ניתוח רגשי ומשמעת</summary>
                   <div class="grid cols-4">
                     <label>מצב שוק
@@ -204,8 +204,11 @@
                 <div class="actions sticky-actions">
                   <button id="submitBtn" type="submit">שמירת עסקה</button>
                   <button id="resetBtn" class="secondary" type="button">ניקוי טופס</button>
+                  <button id="duplicateLastBtn" class="secondary" type="button">שכפול עסקה אחרונה</button>
+                  <label class="inline-toggle"><input id="quickMode" type="checkbox" /> מצב הזנה רציפה</label>
                 </div>
               </form>
+              <p id="draftHint" class="status">טיוטה: לא נשמרה</p>
               <p id="statusBar" class="status"></p>
             </div>
 
