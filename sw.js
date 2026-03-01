@@ -1,4 +1,4 @@
-﻿const CACHE = "fx-journal-v3";
+﻿const CACHE = "fx-journal-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -19,6 +19,10 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("fetch", (event) => {

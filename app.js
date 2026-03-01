@@ -63,6 +63,7 @@ const fieldIds = [
 let trades = loadTrades();
 let startingBalance = loadStartingBalance();
 let installPromptEvent = null;
+let swReloadTriggered = false;
 let screenshotDataUrl = "";
 
 init();
@@ -776,8 +777,44 @@ function clearAllData() {
 
 function setupPwa() {
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    window.addEventListener("load", async () => {
+      try {
+        const registration = await navigator.serviceWorker.register("./sw.js");
+
+        const triggerActivation = (worker) => {
+          if (worker) worker.postMessage({ type: "SKIP_WAITING" });
+        };
+
+        if (registration.waiting) triggerActivation(registration.waiting);
+
+        registration.addEventListener("updatefound", () => {
+          const worker = registration.installing;
+          if (!worker) return;
+          worker.addEventListener("statechange", () => {
+            if (worker.state === "installed" && navigator.serviceWorker.controller) {
+              triggerActivation(worker);
+            }
+          });
+        });
+
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (swReloadTriggered) return;
+          swReloadTriggered = true;
+          window.location.reload();
+        });
+
+        setInterval(() => {
+          registration.update().catch(() => {});
+        }, 60000);
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") {
+            registration.update().catch(() => {});
+          }
+        });
+      } catch {
+        // Ignore SW errors to keep core app functional.
+      }
     });
   }
 
